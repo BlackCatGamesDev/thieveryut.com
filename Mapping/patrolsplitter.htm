@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0051)http://yhared.sytes.net/thievery/splitterguide.html -->
+<HTML><HEAD><TITLE>Mordengaard's Guide to TPatrolPointSplitters</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=iso-8859-1">
+<META content="MSHTML 6.00.2600.0" name=GENERATOR></HEAD>
+<BODY text=#c0c0c0 bgColor=#000000><FONT face=Arial>
+<P><B>Mordengaard's Guide to TPatrolPointSplitters</B></P>
+<P>Location:&nbsp; 
+Actor-&gt;NavigationPoint-&gt;TPatrolPoint-&gt;TPatrolPointSplitter</P>
+<P>A TPatrolPointSplitter (henceforth referred to as a "splitter") is identical 
+to a standard patrol point actor for all intents and purposes, except that it 
+has additional properties allowing bots arriving at it to use alternative 
+routes.&nbsp; The splitter has two modes (SplitterType property in the 
+TPatrolPointSplitter section of the actor properties) - EPPST_Random, which 
+sends the bot to a random patrol point as listed in the NextPointTags property, 
+or EPPST_RoundRobin, which sends the bot to the next patrol point in the list. 
+The NextPointTags list replaces the Event tag which standard patrol points use 
+to indicate the Tag of the next patrol point.</P>
+<P>And that's really all there is to it, but I thought it might be helpful to 
+give you some examples to highlight some of the uses of this actor in the 
+context of a Thievery map, because I've found more in using it than I envisioned 
+when I came up with the idea and whipped Joel into coding it.</P>
+<HR color=#800000 SIZE=5>
+
+<P><B>Example 1:&nbsp; Walking around obstacles</B></P>
+<P><IMG height=174 hspace=10 src="patrolsplitter_files/splitt1.gif" width=263 
+align=left border=0>Any mapper who has ever placed an obstacle in the middle of 
+a room (a table, for instance), and had a bot walk through the room as part of 
+an extended patrol, knows that unless the room is brightly lit they have 
+probably created a "safe" zone for thieves, who (knowing the bots route) can 
+happily sit on the other side of the table and never have to worry about being 
+discovered.&nbsp; Here's how to give them a shock!</P>
+<P>Given the standard patrol route went A-B-C-D, all we need to do is replace B 
+with a splitter and&nbsp; put in patrol points E and F (E leading to F, which 
+then leads to C).&nbsp; Then we set B's NextPointTags to C and E.&nbsp; Now any 
+bot following this route has the "option" to walk around the table, either 
+randomly or alternating on each circuit.</P>
+<HR color=#800000 SIZE=5>
+
+<P><B>Example 2:&nbsp; There and back again</B></P>
+<P><IMG height=174 hspace=10 src="patrolsplitter_files/splitt2.gif" width=263 
+align=left border=0>Most patrol routes in current maps are circular in nature, 
+even when they don't look like it.&nbsp; The bot walks along the route, and then 
+generally returns to the start of the route and does it again.&nbsp; For mappers 
+trying to do a A-&gt;Z then Z-&gt;A reversed route, this is a nightmare, 
+especially if the bot has to walk a complicated path, as the bot needs twice the 
+number of patrol points.&nbsp; Not any more!</P>
+<P>To achieve the pictured route normally would require four patrol points - A, 
+B, C, and a second patrol point at position B.&nbsp; By making B a round robin 
+splitter pointing to C and then A, we reduce the number of patrol points 
+required by one (I know, not a big saving here, but imagine this on a long 
+complicated route).&nbsp; The bot walks from A to B, the splitter sends him on 
+to C, then C sends him back to B which this time sends him to A, and so the loop 
+continues.</P>
+<HR color=#800000 SIZE=5>
+
+<P><B>Example 3:&nbsp; Checking the cells</B></P>
+<P><IMG height=174 hspace=10 src="patrolsplitter_files/splitt3.gif" width=263 
+align=left border=0>Mappers hate having to put branches off their patrol routes 
+(well, I know I do).&nbsp; In this example, to produce the same effect -without- 
+splitters would require eight patrol points but with splitters we only need 
+six.&nbsp; Not much of a saving, I hear you say, but wait, there's more.</P>
+<P>You can probably already see how it's laid out - A, E, F and D are standard 
+patrol points, while B and C are round-robin type splitters which point to E and 
+C, and F and D respectively.&nbsp; However, without adding a single extra patrol 
+point or splitter, the bot on this route can walk -back- from point D to point 
+A, checking each cell on his way back.&nbsp; How?&nbsp; Easy really, and it uses 
+basically the same system as example 2.</P>
+<P>Look at splitter B - if this was a one way route (i.e. A-&gt;D) B would be 
+set with E and C as it's NextPointTags entries.&nbsp; The first time the bot 
+reaches this point it walks to E, then the next time it gets here (on the way 
+back from E) it walks to C.&nbsp; Next time around the circuit, it repeats this 
+sequence.&nbsp; However, doing an A-&gt;D-&gt;A loop would only require the 
+addition of two more entries in the NextPointTags list - E again, and then 
+A!&nbsp; To achieve this loop without using splitters would require fourteen 
+patrol points!</P>
+<HR color=#800000 SIZE=5>
+
+<P><B>Example 4:&nbsp; You take the high road...</B></P>
+<P><IMG height=174 hspace=10 src="patrolsplitter_files/splitt1.gif" width=263 
+align=left border=0>Multiple bots on the same route have to be considered when 
+designing your paths.&nbsp; In the above examples I assumed only one bot was 
+walking the route.&nbsp; In this case, let's assume there are two, and let's 
+convert the splitter (B) to a round robin type.</P>
+<P>The first bot walks into the room, reaches point B, and walks straight on to 
+C and then leaves.&nbsp; The next bot walks in, hits B, and then goes to E and F 
+before going to C and exitting the room.</P>
+<P>&nbsp;</P>
+<P><IMG height=174 hspace=10 src="patrolsplitter_files/splitt2.gif" width=263 
+align=left border=0>This behaviour can cause problems, particularly in 
+there-and-back routes like that in example 2, because the first bot would reach 
+B and walk on normally, but the second bot would reach B and return to A - then 
+the first bot would reach B on his way back from C and be bounced back to 
+C.&nbsp; Both bots would then continue to bounce backwards and forwards 
+(assuming the distances were the same).&nbsp; There is a way to use this 
+behaviour to your advantage, however.</P>
+<P>Let's say you set up a route walked by two bots - one bot handles the 'A' 
+side of the route, while the other handles the 'C' side.&nbsp; Careful setting 
+of the properties of the splitter B would allow the bots to stay on their own 
+sides of the patrol route, <I>while there were two bots walking the 
+route.</I>&nbsp; As soon as either bot is disrupted, however (knocked out, or 
+off investigating) the B 'gate' would allow the other bot to pass through into 
+the other side.&nbsp; Once both bots are back walking the route, they'd return 
+to walking each side (although they may swap sides) using the B point as a 
+"bouncer".</P>
+<HR color=#800000 SIZE=5>
+
+<P>There are probably more uses for splitters than I've dealt with here, 
+especially when you tie them in with the other bot-control actors like 
+orderchangers, but these are main ones I've come up with so far.&nbsp; I'll add 
+more as I encounter them.&nbsp; In the meantime, enjoy making superior patrol 
+routes!&nbsp; </P>
+<P>If you have any questions of a technical nature regarding 
+TPatrolPointSplitter actors, please address them to Joel.&nbsp; Comments on this 
+guide or ideas for additional uses of splitters should be directed to 
+myself.</P>
+<P>--- Mordengaard</P></FONT></BODY></HTML>
